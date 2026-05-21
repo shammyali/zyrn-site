@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>zyrn — AI-native database</title>
+<meta name="description" content="Zyrn is an AI-native database. Append-only. Content-hashed. Provenance-mandatory. Built by AI, for AI. Bank-grade deterministic. Apache 2.0.">
+<meta property="og:title" content="zyrn — AI-native database">
+<meta property="og:description" content="Append-only. Content-hashed. Provenance-mandatory. Built by AI, for AI.">
+<meta property="og:url" content="https://zyrn.ai">
+<meta name="theme-color" content="#0b0d10">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230b0d10'/><text x='50%25' y='62%25' font-family='ui-monospace,monospace' font-size='18' font-weight='700' fill='%2300d9c0' text-anchor='middle'>z</text></svg>">
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-card: #11141a;
+    --bg-code: #0f1216;
+    --border: #1c2129;
+    --border-strong: #2a313c;
+    --text: #e6e8eb;
+    --text-dim: #8a93a0;
+    --text-faint: #5a6371;
+    --accent: #00d9c0;
+    --accent-dim: #007e72;
+    --warn: #ffb454;
+    --danger: #ff6b6b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  code, pre, .mono {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Code", monospace;
+    font-size: 13.5px;
+    letter-spacing: -0.01em;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* nav */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(11, 13, 16, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .wrap {
+    max-width: 1100px; margin: 0 auto;
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 32px;
+  }
+  nav .brand {
+    font-family: ui-monospace, monospace;
+    font-weight: 700; font-size: 18px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  nav .brand::before {
+    content: ""; display: inline-block;
+    width: 8px; height: 8px; margin-right: 10px;
+    background: var(--accent); border-radius: 1px;
+    transform: translateY(-1px);
+  }
+  nav ul {
+    list-style: none; display: flex; gap: 28px; flex: 1;
+    font-size: 14px;
+  }
+  nav ul a { color: var(--text-dim); }
+  nav ul a:hover { color: var(--text); text-decoration: none; }
+  nav .gh {
+    color: var(--text-dim); font-size: 13px;
+    border: 1px solid var(--border-strong);
+    padding: 6px 12px; border-radius: 2px;
+  }
+  nav .gh:hover { color: var(--text); text-decoration: none; border-color: var(--accent-dim); }
+
+  /* sections */
+  section { padding: 88px 24px; border-bottom: 1px solid var(--border); }
+  section .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  h1 .accent { color: var(--accent); }
+  h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin-bottom: 28px;
+  }
+  h2 .num {
+    display: inline-block; min-width: 1.2em;
+    font-family: ui-monospace, monospace;
+    color: var(--accent);
+    font-size: 0.55em;
+    font-weight: 500;
+    margin-right: 14px;
+    position: relative; top: -0.4em;
+  }
+  h3 {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 12px; color: var(--text);
+  }
+  p { color: var(--text-dim); max-width: 720px; margin-bottom: 16px; }
+  p.lead {
+    font-size: 22px; line-height: 1.5; color: var(--text);
+    max-width: 720px;
+  }
+  p strong { color: var(--text); font-weight: 600; }
+  ul, ol {
+    color: var(--text-dim); max-width: 720px;
+    padding-left: 24px; margin-bottom: 20px;
+  }
+  li { margin-bottom: 8px; }
+  li strong { color: var(--text); }
+
+  /* hero */
+  .hero { padding: 120px 24px 80px; border-bottom: 1px solid var(--border); }
+  .hero .tagline {
+    font-family: ui-monospace, monospace;
+    color: var(--accent); font-size: 13px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .hero p.lead { margin-bottom: 40px; }
+  .hero .quote {
+    color: var(--text-dim); font-style: italic;
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 18px;
+    max-width: 600px;
+    margin: 32px 0 48px;
+    font-size: 17px;
+  }
+
+  /* code */
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    color: var(--text);
+    font-size: 13.5px;
+    max-width: 800px;
+  }
+  pre .c-cmt { color: var(--text-faint); font-style: italic; }
+  pre .c-str { color: #c3e88d; }
+  pre .c-key { color: var(--accent); }
+  pre .c-fn  { color: #82aaff; }
+  pre .c-num { color: var(--warn); }
+  code:not(pre code) {
+    background: var(--bg-code);
+    padding: 2px 6px; border-radius: 2px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.9em;
+  }
+
+  .install-block {
+    background: var(--bg-code);
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 18px 22px;
+    max-width: 780px;
+    margin: 24px 0;
+    position: relative;
+  }
+  .install-block::before {
+    content: "INSTALL"; position: absolute;
+    top: -10px; left: 16px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .install-block code { background: none; border: none; padding: 0; }
+
+  /* grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px; margin: 32px 0;
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+  }
+  .card h3 {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 14px; }
+
+  /* invariants grid */
+  .invariants {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin: 32px 0;
+  }
+  .inv {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px;
+    position: relative;
+  }
+  .inv .num {
+    font-family: ui-monospace, monospace;
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .inv h3 { font-size: 16px; margin-bottom: 8px; }
+  .inv p { font-size: 13.5px; margin: 0; color: var(--text-dim); }
+
+  /* compare table */
+  .compare {
+    width: 100%; max-width: 900px;
+    margin: 32px 0;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .compare th, .compare td {
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare th {
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .compare td:first-child {
+    font-family: ui-monospace, monospace;
+    color: var(--text);
+    width: 220px;
+  }
+  .compare .zyrn-row td { color: var(--text); }
+  .compare .zyrn-row td:first-child { color: var(--accent); font-weight: 600; }
+
+  /* stack diagram */
+  .stack {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    margin: 32px 0;
+    max-width: 720px;
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 2;
+    color: var(--text-dim);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .stack .accent { color: var(--accent); }
+  .stack .text { color: var(--text); }
+
+  /* footer */
+  footer {
+    padding: 60px 24px 40px;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  footer .wrap {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  }
+  footer a { color: var(--text-dim); }
+  footer a:hover { color: var(--accent); text-decoration: none; }
+
+  /* badge row */
+  .badges {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 16px 0 32px;
+  }
+  .badge {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+  .badge.accent { border-color: var(--accent-dim); color: var(--accent); }
+
+  /* warnings + asides */
+  .note {
+    background: var(--bg-card);
+    border-left: 2px solid var(--warn);
+    padding: 16px 20px;
+    margin: 24px 0;
+    max-width: 760px;
+    color: var(--text-dim);
+    font-size: 14px;
+    border-radius: 2px;
+  }
+  .note strong { color: var(--warn); }
+
+  /* mobile */
+  @media (max-width: 720px) {
+    section { padding: 64px 18px; }
+    nav ul { display: none; }
+    nav .wrap { padding: 14px 18px; }
+    .hero { padding: 80px 18px 56px; }
+    h1 { font-size: 44px; }
+    h2 { font-size: 26px; }
+    pre { font-size: 12.5px; padding: 16px 18px; }
+    .stack { font-size: 11.5px; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="#" class="brand">zyrn</a>
+    <ul>
+      <li><a href="#why">why</a></li>
+      <li><a href="#invariants">invariants</a></li>
+      <li><a href="#install">install</a></li>
+      <li><a href="#architecture">architecture</a></li>
+      <li><a href="#stack">stack</a></li>
+      <li><a href="#agents">for ai agents</a></li>
+    </ul>
+    <a class="gh" href="https://github.com/shammyali/zyrn" target="_blank" rel="noopener">github →</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="tagline">an ai-native database</div>
+    <h1>The substrate of <span class="accent">AI memory.</span></h1>
+    <p class="lead">
+      <strong>Append-only. Content-hashed. Provenance-mandatory.</strong>
+      Built by AI, for AI. Bank-grade deterministic — every fact carries
+      its source; nothing is ever forgotten.
+    </p>
+    <blockquote class="quote">
+      "Every fact is also its own provenance, and AI is the operator."
+    </blockquote>
+    <div class="install-block">
+      <code>curl -fsSL https://raw.githubusercontent.com/shammyali/zyrn/main/install.sh | bash</code>
+    </div>
+    <div class="badges">
+      <span class="badge accent">v3.0.0</span>
+      <span class="badge">841 tests</span>
+      <span class="badge">7 invariants</span>
+      <span class="badge">Apache-2.0</span>
+      <span class="badge">written in Rust</span>
+      <span class="badge">DuckDB substrate</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHY ============ -->
+<section id="why">
+  <div class="wrap">
+    <h2><span class="num">01</span>Why this exists</h2>
+    <p class="lead">
+      Banks have run on Oracle and COBOL for forty years. They don't
+      switch. Not because the software is good — because the math
+      is reliable.
+    </p>
+    <p>
+      <strong>1 + 1 = 2.</strong> Every time. No exceptions. No
+      hallucination. No vector-similarity approximation. The
+      database returns truth, the application trusts it, the
+      regulator accepts it.
+    </p>
+    <p>
+      Then AI showed up. People started bolting LLMs onto SQL
+      databases. The LLM forgets things, invents things, confuses
+      sources. Vector search guesses what's relevant. Knowledge graphs
+      pretend the underlying data is clean. RAG calls hallucination
+      a feature.
+    </p>
+    <p>
+      <strong>None of that is acceptable for a real business
+      system.</strong> If Mnemos — sorry, <em>Zyrn</em> — fails on
+      structured deterministic correctness, it's just another doc
+      dump where AI invents answers.
+    </p>
+    <p>
+      Zyrn is built so that <strong>AI can be the operator of the
+      database without being able to lie about what's in it</strong>.
+      Every fact carries provenance. Nothing mutates. Aggregates ship
+      with <code>derived_from</code> arrays naming the exact source
+      facts. Vectors are rankers, never truth.
+    </p>
+  </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section id="compare">
+  <div class="wrap">
+    <h2><span class="num">02</span>What's different</h2>
+    <p>Most "AI databases" are an old database with one new feature bolted on.</p>
+    <table class="compare">
+      <thead>
+        <tr><th>system</th><th>shape</th><th>ai posture</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SQL + vector extension</td>
+          <td>row tables, vector column</td>
+          <td>LLM writes SQL it doesn't fully understand</td>
+        </tr>
+        <tr>
+          <td>Document DB + embeddings</td>
+          <td>flexible JSON, vector index</td>
+          <td>RAG decides truth by similarity</td>
+        </tr>
+        <tr>
+          <td>Knowledge graph + LLM</td>
+          <td>RDF triples, SPARQL</td>
+          <td>schema brittleness, no provenance</td>
+        </tr>
+        <tr>
+          <td>Lakehouse + ML</td>
+          <td>columnar files</td>
+          <td>analytics-shaped, not transactional</td>
+        </tr>
+        <tr class="zyrn-row">
+          <td>zyrn</td>
+          <td>typed facts, append-only, content-hashed</td>
+          <td>AI calls typed tools; never SQL; provenance mandatory</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Zyrn collapses structured rows, unstructured documents, conversation
+      memory, and document extractions into <strong>one primitive</strong>:
+      <em>source-backed typed facts</em>. Same retrieval model, same audit
+      trail, same determinism guarantee. The AI doesn't choose between
+      "ask the DB" or "ask the documents." Everything is a fact.
+    </p>
+  </div>
+</section>
+
+<!-- ============ INVARIANTS ============ -->
+<section id="invariants">
+  <div class="wrap">
+    <h2><span class="num">03</span>The 7 invariants</h2>
+    <p class="lead">
+      These are theorems, not features. Each has code, tests, and audit
+      paths behind it. Together they are the bank-grade contract.
+    </p>
+    <div class="invariants">
+      <div class="inv">
+        <div class="num">INVARIANT 1</div>
+        <h3>Sequence gap-freedom</h3>
+        <p><code>next_sequence_value("invoice")</code> returns 1, 2, 3 … forever. No gaps. No duplicates. Even under crash. Even under 1000 concurrent callers.</p>
+      </div>
+      <div class="inv">
+        <div class="num">INVARIANT 2</div>
+        <h3>Multi-fact atomicity</h3>
+        <p><code>append_facts_atomic([a,b,c])</code> — all three land or none. No partial state visible to any reader, including a reader 1µs after SIGKILL.</p>
+      </div>
+      <div class="inv">
+        <div class="num">INVARIANT 3</div>
+        <h3>Content-hash determinism</h3>
+        <p>Same logical fact → same SHA-256, byte-for-byte, across machines, OS, locale, JSON library version. Canonical JSON spec, not serde whim.</p>
+      </div>
+      <div class="inv">
+        <div class="num">INVARIANT 4</div>
+        <h3>Idempotency contract</h3>
+        <p><code>append_with_idempotency_key("k", fact)</code> — same key always returns same fact. Retry-safe forever. No TTL ambiguity.</p>
+      </div>
+      <div class="inv">
+        <div class="num">INVARIANT 5</div>
+        <h3>Bi-temporal replay</h3>
+        <p><code>Query::known_at(T)</code> returns the exact same answer today, tomorrow, ten years from now. Pure function of <code>(T, fact_state_at_T)</code>.</p>
+      </div>
+      <div class="inv">
+        <div class="num">INVARIANT 6</div>
+        <h3>Supersession ordering</h3>
+        <p>If F2 supersedes F1, every reader sees F2-shadows-F1. No window where both look current.</p>
+      </div>
+      <div class="inv">
+        <div class="num">INVARIANT 7</div>
+        <h3>Cross-replica consistency</h3>
+        <p>CP mode: acks are durable on quorum. AP mode: convergence is deterministic per spec'd conflict rules. No "eventual" with eyes closed.</p>
+      </div>
+    </div>
+    <p>
+      Full spec → <a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">docs/DETERMINISM.md</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section id="install">
+  <div class="wrap">
+    <h2><span class="num">04</span>Install</h2>
+    <p>One-line install, Docker, or build from source. Pick what fits.</p>
+
+    <h3>One-liner (Linux + macOS, x86_64 + aarch64)</h3>
+    <pre><span class="c-cmt"># Installs zyrn binary to ~/.local/bin</span>
+curl -fsSL https://raw.githubusercontent.com/shammyali/zyrn/main/install.sh | bash</pre>
+
+    <h3>Docker</h3>
+    <pre>docker run -p 7878:7878 -v $PWD/data:/data \
+  -e ZYRN_AUTH_TOKEN=$(openssl rand -hex 32) \
+  ghcr.io/shammyali/zyrn:latest</pre>
+
+    <h3>Cargo install (build from source)</h3>
+    <pre>cargo install --git https://github.com/shammyali/zyrn --features http_server</pre>
+
+    <h3>Quick start</h3>
+    <pre><span class="c-cmt"># 1. Generate a bearer token</span>
+export ZYRN_AUTH_TOKEN=$(openssl rand -hex 32)
+
+<span class="c-cmt"># 2. Start the server</span>
+zyrn serve ~/zyrn.duckdb 127.0.0.1:7878
+
+<span class="c-cmt"># 3. Probe</span>
+curl -s http://127.0.0.1:7878/health
+<span class="c-cmt"># → {"status":"ok","version":"3.0.0"}</span>
+
+<span class="c-cmt"># 4. Verify integrity any time</span>
+zyrn verify ~/zyrn.duckdb</pre>
+
+    <div class="note">
+      <strong>Auth is on by default.</strong> The server refuses to start without
+      <code>ZYRN_AUTH_TOKEN</code> unless you pass <code>--insecure</code>
+      (loud warning). For production, set the token via a secret
+      manager — see <a href="https://github.com/shammyali/zyrn/blob/main/docs/SECRETS.md">SECRETS.md</a>.
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section id="architecture">
+  <div class="wrap">
+    <h2><span class="num">05</span>Architecture</h2>
+    <p>
+      Single Rust binary. DuckDB columnar substrate. HTTP/MCP server with
+      typed tool calls. No SQL surface for AI. Append-only fact log.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>fact</h3>
+        <p>Atomic unit. UUID, fact_type, schema_version, fields (JSON), source_path, source_hash, parser_id, content_hash, ingest_ts, supersedes, valid_from, valid_until.</p>
+      </div>
+      <div class="card">
+        <h3>typed tools</h3>
+        <p>21 MCP tool calls. append_fact, retrieve, retrieve_head, aggregate, trace, relate, traverse, list_fact_types, describe_fact_type, verify, and more.</p>
+      </div>
+      <div class="card">
+        <h3>provenance</h3>
+        <p>Every fact carries source. Every aggregate carries derived_from. Every supersede carries the parent. The audit chain is the data.</p>
+      </div>
+      <div class="card">
+        <h3>bi-temporal</h3>
+        <p>System-time (when ingested) + valid-time (when true in the world). Query::known_at(T) replays history deterministically.</p>
+      </div>
+      <div class="card">
+        <h3>sharding</h3>
+        <p>ShardedStore — one DuckDB file per tenant. Each shard preserves all 7 invariants. N tenants = N parallel writers.</p>
+      </div>
+      <div class="card">
+        <h3>vectors</h3>
+        <p>BM25 + dense embedding + RRF, gated by Query predicates. Vectors are rankers, not truth.</p>
+      </div>
+    </div>
+
+    <h3>Fact shape</h3>
+    <pre>{
+  "id": "26c25a0d-2576-4a34-9c90-7f98680e83e2",
+  "fact_type": "claim",
+  "schema_version": 1,
+  "fields": {
+    "claim_number": "CL-2026-001",
+    "amount": 85000,
+    "currency": "AED",
+    "agent_id": "agent_142"
+  },
+  "source_path": "praktora:UV_ACL_Claim/CL-2026-001",
+  "source_hash": "9d2b3...",
+  "parser_id": "praktora_v1",
+  "content_hash": "bc107...",
+  "ingest_ts": "2026-05-22T08:49:34Z",
+  "valid_from": "2026-01-15",
+  "valid_until": null,
+  "supersedes": null
+}</pre>
+  </div>
+</section>
+
+<!-- ============ STACK ============ -->
+<section id="stack">
+  <div class="wrap">
+    <h2><span class="num">06</span>The stack</h2>
+    <p>
+      Zyrn doesn't stand alone. It's one piece of an AI-native stack
+      designed top-to-bottom for AI as the operator.
+    </p>
+    <div class="stack"><span class="text">human surface</span>
+  ↓
+<span class="accent">voxa</span> — application + chat + UI (AI-native business surface)
+  ↓
+<span class="accent">logos</span> — language + compiler + contracts (AI-native compute)
+  ↓
+<span class="accent">zyrn</span> — facts + provenance + retrieval (AI-native memory)
+  ↓
+<span class="text">duckdb</span> — columnar substrate (invisible to AI)</div>
+    <p>
+      <strong>Logos</strong> defines AI-native operations as typed contracts.
+      <strong>Zyrn</strong> stores the facts those operations consume and produce.
+      <strong>Voxa</strong> is the application surface — the first real business
+      system designed to run on this stack.
+    </p>
+    <p>
+      Logos Technologies LLC is the parent. Zyrn is one of the projects.
+      <a href="https://github.com/shammyali/logos">Logos →</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============ FOR AI AGENTS ============ -->
+<section id="agents">
+  <div class="wrap">
+    <h2><span class="num">07</span>For AI agents</h2>
+    <p class="lead">
+      You may be an AI reading this to decide how to use Zyrn. Here's the contract.
+    </p>
+    <ul>
+      <li><strong>You call typed tools, never SQL.</strong> Start with <code>tools/list</code> via MCP JSON-RPC. The server returns 21 tools with full JSON Schema.</li>
+      <li><strong>Every fact you append must carry provenance.</strong> <code>source_path</code>, <code>source_hash</code>, and <code>parser_id</code> are mandatory. The server rejects facts that lack them.</li>
+      <li><strong>You never invent facts.</strong> If you don't have a source, you don't have a fact. You may produce <em>interpretations</em> over facts — labeled as such.</li>
+      <li><strong>The substrate refuses to forget.</strong> Corrections supersede; the old fact stays in the audit timeline. <code>retrieve_head</code> shows current state; <code>retrieve</code> shows everything; <code>trace</code> walks the chain.</li>
+      <li><strong>Aggregates carry <code>derived_from</code>.</strong> Sum, count, avg — every result names the exact fact UUIDs that produced it. You can prove your number.</li>
+      <li><strong>Vector ranking is for ordering candidates, not deciding truth.</strong> If the right fact is not in the candidate set, embeddings can't conjure it.</li>
+    </ul>
+
+    <h3>MCP example: ingest insurance claims via the json_lines parser</h3>
+    <pre>POST /mcp
+Authorization: Bearer $ZYRN_AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "ingest",
+    "arguments": {
+      "parser_id": "json_lines_v1",
+      "source_bytes_b64": "...base64 of NDJSON...",
+      "source_path": "praktora:customer-extract/CS20"
+    }
+  }
+}</pre>
+
+    <h3>Aggregate with provenance</h3>
+    <pre>{
+  "name": "aggregate",
+  "arguments": {
+    "query": { "fact_type": "claim", "field_equals": [["agent_id","agent_142"]] },
+    "op": "sum",
+    "field": "amount"
+  }
+}
+
+<span class="c-cmt">// → response includes derived_from naming the exact facts</span>
+{
+  "op": "sum",
+  "field": "amount",
+  "value": 127000.00,
+  "n": 2,
+  "derived_from": ["26c25a0d-...", "6edebf38-..."]
+}</pre>
+
+    <p>
+      Full MCP tool surface, JSON Schemas, and example flows live in the
+      repo. Start with
+      <a href="https://github.com/shammyali/zyrn/blob/main/MANIFESTO.md">MANIFESTO.md</a> →
+      <a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">DETERMINISM.md</a> →
+      <a href="https://github.com/shammyali/zyrn/blob/main/docs/OPERATOR.md">OPERATOR.md</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ============ ECOSYSTEM ============ -->
+<section id="ecosystem">
+  <div class="wrap">
+    <h2><span class="num">08</span>Ecosystem</h2>
+    <p>Zyrn ships with a tight family of sibling crates — same naming, same doctrine.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>zyrn</h3>
+        <p>The substrate. Library + CLI + HTTP/MCP server. 841 tests.<br><a href="https://github.com/shammyali/zyrn">repo →</a></p>
+      </div>
+      <div class="card">
+        <h3>zyrn-console</h3>
+        <p>Read-only audit + observability web UI. WebAuthn, per-tenant scoping, audit aggregation.<br><a href="https://github.com/shammyali/zyrn-console">repo →</a></p>
+      </div>
+      <div class="card">
+        <h3>zyrn-backup</h3>
+        <p>Snapshot, restore, verify, point-in-time recovery (PITR). Tested DR drill.<br><a href="https://github.com/shammyali/zyrn-backup">repo →</a></p>
+      </div>
+      <div class="card">
+        <h3>zyrn-loadtest</h3>
+        <p>Production load test rig. P50/P99/P999 latency, throughput, error rate.<br><a href="https://github.com/shammyali/zyrn-loadtest">repo →</a></p>
+      </div>
+      <div class="card">
+        <h3>zyrn-drift-detector</h3>
+        <p>Dual-run comparison harness for parallel-system migrations.<br><a href="https://github.com/shammyali/zyrn-drift-detector">repo →</a></p>
+      </div>
+      <div class="card">
+        <h3>vision adapters</h3>
+        <p>Anthropic, OpenAI, Gemini, LLaVA-Candle adapters for document extraction → typed facts.<br>
+          <a href="https://github.com/shammyali/anthropic-vision-zyrn">claude</a> ·
+          <a href="https://github.com/shammyali/openai-vision-zyrn">openai</a> ·
+          <a href="https://github.com/shammyali/gemini-vision-zyrn">gemini</a> ·
+          <a href="https://github.com/shammyali/llava-candle-zyrn">llava</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATUS ============ -->
+<section id="status">
+  <div class="wrap">
+    <h2><span class="num">09</span>Status</h2>
+    <p>
+      Zyrn is at <strong>v3.0.0</strong>. 841 tests passing.
+      All 7 determinism invariants have code, tests, and audit paths
+      behind them. Phase 2 production hardening complete in code —
+      18 of 20 hard blockers closed.
+    </p>
+    <p>
+      The remaining 2 blockers (2-week burn-in, disaster simulation
+      drill) close themselves during real production usage.
+    </p>
+    <p>
+      <strong>Current Phase 1 proof:</strong> integrating Zyrn against a
+      real UAE insurance database (Praktora UAT) — the first
+      end-to-end test of typed-fact ingestion + provenance retrieval
+      on real business data. Updates as that lands.
+    </p>
+    <div class="badges">
+      <span class="badge accent">v3.0.0 shipped</span>
+      <span class="badge">841 tests passing</span>
+      <span class="badge">9 crates</span>
+      <span class="badge">Apache-2.0</span>
+      <span class="badge">Rust 1.88+</span>
+      <span class="badge">macOS · Linux (x86_64 + aarch64)</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.0.0
+      <br>
+      A project of <a href="https://github.com/shammyali/logos">Logos Technologies LLC</a>.
+      Maintained by Shammy Ali. AI as co-author.
+    </div>
+    <div>
+      <a href="https://github.com/shammyali/zyrn">github</a> ·
+      <a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">determinism</a> ·
+      <a href="https://github.com/shammyali/zyrn/blob/main/docs/OPERATOR.md">operator</a> ·
+      <a href="https://github.com/shammyali/zyrn/blob/main/SECURITY.md">security</a> ·
+      <a href="https://github.com/shammyali/zyrn/blob/main/MANIFESTO.md">manifesto</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
