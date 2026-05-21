@@ -412,7 +412,7 @@
 
 <nav>
   <div class="wrap">
-    <a href="#" class="brand">zyrn<span class="version">v3.1.0</span></a>
+    <a href="#" class="brand">zyrn<span class="version">v3.1.1</span></a>
     <ul>
       <li><a href="#install">install</a></li>
       <li><a href="#invariants">invariants</a></li>
@@ -429,7 +429,7 @@
 <!-- ============ HERO ============ -->
 <header class="hero">
   <div class="wrap">
-    <div class="meta"><span class="dot"></span>v3.1.0 · 859 tests passing · Apache-2.0 · written in Rust · <a href="#protocol" style="color:var(--accent);border-bottom:none;">The Protocol</a></div>
+    <div class="meta"><span class="dot"></span>v3.1.1 · 873 tests passing · Apache-2.0 · written in Rust · <a href="#protocol" style="color:var(--accent);border-bottom:none;">The Protocol — enforced</a></div>
     <h1>Zyrn — an AI-native database.</h1>
     <p class="lead">
       Append-only, content-hashed, provenance-mandatory. Built by AI, for AI.
@@ -826,7 +826,7 @@ Content-Type: application/json
 <!-- ============ PROTOCOL ============ -->
 <section id="protocol">
   <div class="wrap">
-    <h2><span class="anchor">§7</span>The Protocol <span style="font-size:14px;color:var(--text-faint);font-weight:400;margin-left:8px;">v1.0 · shipped v3.1.0</span></h2>
+    <h2><span class="anchor">§7</span>The Protocol <span style="font-size:14px;color:var(--text-faint);font-weight:400;margin-left:8px;">v1.0 · enforced since v3.1.1</span></h2>
 
     <p class="lead" style="margin-bottom: 4px;">
       The protocol is not a request for AI to be well-behaved. It's a description of
@@ -843,11 +843,11 @@ Content-Type: application/json
 
     <div class="badges" style="margin-top: 18px;">
       <span class="badge accent">9 laws</span>
-      <span class="badge green">6 hard-enforced</span>
-      <span class="badge">2 hybrid</span>
-      <span class="badge">1 behavioral</span>
+      <span class="badge green">strict by default</span>
+      <span class="badge green">handshake gates every call</span>
       <span class="badge">SHA-256-bound</span>
       <span class="badge">session TTL 5m / 1h</span>
+      <span class="badge">HTTP 412 / JSON-RPC -32503</span>
     </div>
 
     <h3 style="margin-top: 32px;">The 9 laws</h3>
@@ -904,8 +904,11 @@ Content-Type: application/json
 
     <h3>Enforcement classification</h3>
     <p class="dim" style="margin-bottom: 4px;">
-      Six of nine laws are structurally unbreakable — no amount of model cleverness
-      changes the outcome because the violation path does not exist in code.
+      Five of nine laws are structurally unbreakable — the violation path does
+      not exist in code, regardless of which AI is on the other side. The
+      handshake itself is now mandatory (v3.1.1) — strict mode is the default
+      and every tool call except the bootstrap requires a valid session, with
+      every refusal emitting an audit fact.
     </p>
     <table>
       <thead><tr><th style="width: 8%;">Law</th><th style="width: 22%;">Class</th><th>Mechanism</th></tr></thead>
@@ -958,15 +961,20 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
 //     absolute_ttl_seconds: 3600,
 //     protocol_version:     "1.0" }</span>
 
-<span class="c-cmt">// 3. Use session_id on subsequent calls (strict mode). Refresh by activity.</span></pre>
+<span class="c-cmt">// 3. Send the session_id on every subsequent call via the
+//    X-Zyrn-Session header. Required in strict mode (the default).</span>
+POST /mcp
+Authorization: Bearer $ZYRN_AUTH_TOKEN
+<span class="c-key">X-Zyrn-Session</span>: zyrn_sess_...
+{ "jsonrpc": "2.0", "id": 2, "method": "tools/call", ... }</pre>
 
     <h3>Handshake modes — operator-configured</h3>
     <table>
       <thead><tr><th style="width: 18%;">Mode</th><th>Behavior</th></tr></thead>
       <tbody>
-        <tr><td><code>strict</code></td><td>Writes require valid <code>session_id</code>. Missing or expired = HTTP 412 + <code>contract_violation</code> audit fact.</td></tr>
-        <tr class="highlight"><td><code>optional</code></td><td><strong>Default in v3.1.</strong> Sessions are recorded but not gating. v4 promotes this to strict.</td></tr>
-        <tr><td><code>off</code></td><td>Sessions bypassed entirely. Dev mode only.</td></tr>
+        <tr class="highlight"><td><code>strict</code></td><td><strong>Default since v3.1.1.</strong> Every tool call except <code>zyrn_protocol_v1</code> requires a valid <code>session_id</code> in the <code>X-Zyrn-Session</code> header. Missing or invalid = HTTP 412 (REST) or JSON-RPC <code>-32503</code> (MCP) + <code>contract_violation</code> audit fact.</td></tr>
+        <tr><td><code>optional</code></td><td>v3.1.0 back-compat shape. Missing sessions allowed; forged sessions still refused (you don't get to lie about an id you don't own).</td></tr>
+        <tr><td><code>off</code></td><td>Sessions bypassed entirely. Dev / trusted in-process callers only.</td></tr>
       </tbody>
     </table>
 
@@ -1052,8 +1060,8 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
       <tbody>
         <tr>
           <td><a href="https://github.com/shammyali/zyrn"><code>zyrn</code></a></td>
-          <td>v3.1.0</td>
-          <td>The substrate. Library + CLI + HTTP/MCP server. 859 tests. Ships <a href="#protocol">The Protocol v1.0</a>.</td>
+          <td>v3.1.1</td>
+          <td>The substrate. Library + CLI + HTTP/MCP server. 873 tests. Ships <a href="#protocol">The Protocol v1.0 — enforced</a>.</td>
         </tr>
         <tr>
           <td><a href="https://github.com/shammyali/zyrn-console"><code>zyrn-console</code></a></td>
@@ -1240,7 +1248,7 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/FUZZING.md">FUZZING.md</a></td><td>cargo-fuzz harness, run instructions.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/RATE_LIMITING.md">RATE_LIMITING.md</a></td><td>Two-layer rate-limit model.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/SECURITY.md">SECURITY.md</a></td><td>Vulnerability disclosure policy.</td></tr>
-        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/CHANGELOG.md">CHANGELOG.md</a></td><td>Full release history v0.0.1 → v3.1.0.</td></tr>
+        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/CHANGELOG.md">CHANGELOG.md</a></td><td>Full release history v0.0.1 → v3.1.1.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1249,7 +1257,7 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
 <footer>
   <div class="wrap">
     <div>
-      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.1.0
+      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.1.1
       <br>
       A project of <a href="https://github.com/shammyali/logos">Logos Technologies LLC</a> (Dubai, UAE).
       Maintained by Shammy Ali. AI as co-author.
