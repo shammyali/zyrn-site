@@ -412,12 +412,13 @@
 
 <nav>
   <div class="wrap">
-    <a href="#" class="brand">zyrn<span class="version">v3.0.0</span></a>
+    <a href="#" class="brand">zyrn<span class="version">v3.1.0</span></a>
     <ul>
       <li><a href="#install">install</a></li>
       <li><a href="#invariants">invariants</a></li>
       <li><a href="#tools">tools</a></li>
       <li><a href="#architecture">architecture</a></li>
+      <li><a href="#protocol">protocol</a></li>
       <li><a href="#ecosystem">ecosystem</a></li>
       <li><a href="#faq">faq</a></li>
     </ul>
@@ -428,7 +429,7 @@
 <!-- ============ HERO ============ -->
 <header class="hero">
   <div class="wrap">
-    <div class="meta"><span class="dot"></span>v3.0.0 · 841 tests passing · Apache-2.0 · written in Rust</div>
+    <div class="meta"><span class="dot"></span>v3.1.0 · 859 tests passing · Apache-2.0 · written in Rust · <a href="#protocol" style="color:var(--accent);border-bottom:none;">The Protocol</a></div>
     <h1>Zyrn — an AI-native database.</h1>
     <p class="lead">
       Append-only, content-hashed, provenance-mandatory. Built by AI, for AI.
@@ -453,6 +454,10 @@
       <div class="quick-card">
         <a href="#tools">↓ Tool reference</a>
         <div class="desc">21 typed MCP tools available to AI agents.</div>
+      </div>
+      <div class="quick-card">
+        <a href="#protocol">↓ The Protocol v1.0</a>
+        <div class="desc">9 laws the substrate refuses to break. Hash-bound handshake.</div>
       </div>
       <div class="quick-card">
         <a href="https://github.com/shammyali/zyrn">↗ Source on GitHub</a>
@@ -818,18 +823,237 @@ Content-Type: application/json
   </div>
 </section>
 
+<!-- ============ PROTOCOL ============ -->
+<section id="protocol">
+  <div class="wrap">
+    <h2><span class="anchor">§7</span>The Protocol <span style="font-size:14px;color:var(--text-faint);font-weight:400;margin-left:8px;">v1.0 · shipped v3.1.0</span></h2>
+
+    <p class="lead" style="margin-bottom: 4px;">
+      The protocol is not a request for AI to be well-behaved. It's a description of
+      what the substrate <strong>refuses to do</strong>.
+    </p>
+    <p class="dim">
+      Compliance is not a function of model strength or goodwill — it's a function of
+      the API surface, schema validators, content-hash gates, and audit emissions
+      that the substrate runs on every call. A strong AI honors the protocol and the
+      enforcement machinery is dormant. A weak or hostile AI tries to violate it and
+      the substrate refuses, emitting a <code>contract_violation</code> audit fact.
+      Either way, behavior is bounded by the substrate, not the agent.
+    </p>
+
+    <div class="badges" style="margin-top: 18px;">
+      <span class="badge accent">9 laws</span>
+      <span class="badge green">6 hard-enforced</span>
+      <span class="badge">2 hybrid</span>
+      <span class="badge">1 behavioral</span>
+      <span class="badge">SHA-256-bound</span>
+      <span class="badge">session TTL 5m / 1h</span>
+    </div>
+
+    <h3 style="margin-top: 32px;">The 9 laws</h3>
+    <table>
+      <thead><tr><th style="width: 8%;">#</th><th style="width: 32%;">Law</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>1</strong></td>
+          <td><strong>Never fabricate facts.</strong></td>
+          <td>A fact requires <code>source_path</code>, <code>source_hash</code>, <code>parser_id</code>. Empty values = rejection. If you have no source, you have no fact.</td>
+        </tr>
+        <tr>
+          <td><strong>2</strong></td>
+          <td><strong>Never mutate. Supersede.</strong></td>
+          <td>No <code>UPDATE</code> tool exists. No <code>DELETE</code> tool exists. Corrections are new facts with <code>supersedes</code> set. The old fact stays.</td>
+        </tr>
+        <tr>
+          <td><strong>3</strong></td>
+          <td><strong>Never use SQL.</strong></td>
+          <td>No SQL tool exists. DuckDB is locked inside the binary. The MCP surface has 21 typed tools; none accept SQL strings.</td>
+        </tr>
+        <tr>
+          <td><strong>4</strong></td>
+          <td><strong>Provenance is mandatory on every write.</strong></td>
+          <td>Empty provenance = rejection at request parse, before any storage. <code>content_hash</code> must equal canonical recomputation.</td>
+        </tr>
+        <tr>
+          <td><strong>5</strong></td>
+          <td><strong>Aggregates cite <code>derived_from</code>.</strong></td>
+          <td>Every <code>sum</code>/<code>count</code>/<code>avg</code> response names the exact fact UUIDs that produced it. No fact-free totals.</td>
+        </tr>
+        <tr>
+          <td><strong>6</strong></td>
+          <td><strong>Vectors rank. Predicates decide truth.</strong></td>
+          <td>No vector-only search exists. Every ranking is gated by a typed <code>Query</code>. If the predicate doesn't return the fact, no embedding can conjure it.</td>
+        </tr>
+        <tr>
+          <td><strong>7</strong></td>
+          <td><strong>When uncertain, abstain.</strong></td>
+          <td>The substrate returns clean empty arrays for no-result queries. No <em>"I think it's probably X."</em></td>
+        </tr>
+        <tr>
+          <td><strong>8</strong></td>
+          <td><strong>All errors audited.</strong></td>
+          <td><code>parse_failure</code>, <code>parser_rate_limit</code>, <code>contract_violation</code> facts auto-emit on every error path. Audit is substrate-automatic.</td>
+        </tr>
+        <tr>
+          <td><strong>9</strong></td>
+          <td><strong>Interpretations labeled, never facts.</strong></td>
+          <td><code>parser_id</code> is verified against the registered parser table in strict mode. AI free-form interpretations live in conversation, not the database.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Enforcement classification</h3>
+    <p class="dim" style="margin-bottom: 4px;">
+      Six of nine laws are structurally unbreakable — no amount of model cleverness
+      changes the outcome because the violation path does not exist in code.
+    </p>
+    <table>
+      <thead><tr><th style="width: 8%;">Law</th><th style="width: 22%;">Class</th><th>Mechanism</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span style="color:var(--green);font-weight:600;">Hard</span> + soft</td><td>Schema rejects empty provenance; audit catches semantic anomalies.</td></tr>
+        <tr><td>2</td><td><span style="color:var(--green);font-weight:600;">Hard</span></td><td>No UPDATE/DELETE tool exists.</td></tr>
+        <tr><td>3</td><td><span style="color:var(--green);font-weight:600;">Hard</span></td><td>No SQL tool exists.</td></tr>
+        <tr><td>4</td><td><span style="color:var(--green);font-weight:600;">Hard</span></td><td>Required-field schema validation at request parse.</td></tr>
+        <tr><td>5</td><td><span style="color:var(--green);font-weight:600;">Hard</span> server / soft client</td><td>Substrate always returns <code>derived_from</code>; AI must cite in narration.</td></tr>
+        <tr><td>6</td><td><span style="color:var(--green);font-weight:600;">Hard</span></td><td>Every rank goes through a typed Query — no vector-only path exists.</td></tr>
+        <tr><td>7</td><td><span style="color:var(--amber);font-weight:600;">Soft</span></td><td>Substrate returns empty results; abstention is behavioral.</td></tr>
+        <tr><td>8</td><td><span style="color:var(--green);font-weight:600;">Hard</span></td><td>Auto-emission baked into every error path.</td></tr>
+        <tr><td>9</td><td><span style="color:var(--accent);font-weight:600;">Hybrid</span></td><td>Parser-registry check enforced when <code>ZYRN_REQUIRE_REGISTERED_PARSERS=true</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Handshake — how an AI acknowledges the protocol</h3>
+    <p>
+      Acknowledgment is not free-form text. It's a content-addressed hash echo. The
+      AI fetches the canonical protocol bytes, computes their SHA-256, and sends
+      that hash back via MCP. If the hashes don't match, the substrate refuses to
+      open a session.
+    </p>
+
+<pre><span class="c-cmt">// 1. Fetch the canonical protocol text. Always open, no auth needed.</span>
+GET /protocol
+<span class="c-cmt">// → { protocol_version: "1.0",
+//     protocol_hash:    "4e93f5b9da60b47819cfaf3290600ea579622df66aae970a0cc055a4a252850a",
+//     protocol_text:    "THE ZYRN PROTOCOL v1.0\n...",
+//     handshake_mode:   "optional" }</span>
+
+<span class="c-cmt">// 2. Echo the hash via the MCP tool zyrn_protocol_v1 (listed FIRST in tools/list).</span>
+POST /mcp
+Authorization: Bearer $ZYRN_AUTH_TOKEN
+{
+  <span class="c-key">"jsonrpc"</span>: <span class="c-str">"2.0"</span>,
+  <span class="c-key">"id"</span>: <span class="c-num">1</span>,
+  <span class="c-key">"method"</span>: <span class="c-str">"tools/call"</span>,
+  <span class="c-key">"params"</span>: {
+    <span class="c-key">"name"</span>: <span class="c-str">"zyrn_protocol_v1"</span>,
+    <span class="c-key">"arguments"</span>: {
+      <span class="c-key">"agent_key"</span>:     <span class="c-str">"your-stable-identifier"</span>,
+      <span class="c-key">"protocol_hash"</span>: <span class="c-str">"&lt;sha-256 from step 1&gt;"</span>
+    }
+  }
+}
+<span class="c-cmt">// → { status: "accepted",
+//     session_id:           "zyrn_sess_...",
+//     idle_ttl_seconds:     300,
+//     absolute_ttl_seconds: 3600,
+//     protocol_version:     "1.0" }</span>
+
+<span class="c-cmt">// 3. Use session_id on subsequent calls (strict mode). Refresh by activity.</span></pre>
+
+    <h3>Handshake modes — operator-configured</h3>
+    <table>
+      <thead><tr><th style="width: 18%;">Mode</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td><code>strict</code></td><td>Writes require valid <code>session_id</code>. Missing or expired = HTTP 412 + <code>contract_violation</code> audit fact.</td></tr>
+        <tr class="highlight"><td><code>optional</code></td><td><strong>Default in v3.1.</strong> Sessions are recorded but not gating. v4 promotes this to strict.</td></tr>
+        <tr><td><code>off</code></td><td>Sessions bypassed entirely. Dev mode only.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Session lifecycle</h3>
+    <table>
+      <thead><tr><th style="width: 22%;">Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Idle TTL</strong></td><td>5 minutes. Refreshes on every successful tool call (sliding window).</td></tr>
+        <tr><td><strong>Absolute cap</strong></td><td>1 hour. After this you must re-handshake regardless of activity.</td></tr>
+        <tr><td><strong>Revocation</strong></td><td>Severe contract violations revoke the session immediately. All subsequent calls return HTTP 412.</td></tr>
+        <tr><td><strong>Hash comparison</strong></td><td>Constant-time. No timing side-channel on whether you guessed the right hash.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Consequences of violation</h3>
+    <table>
+      <thead><tr><th style="width: 18%;">Severity</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Mild</strong></td><td>Substrate emits <code>contract_violation</code> fact with reason + calling <code>session_id</code>. Call returns 4xx with the violated law cited.</td></tr>
+        <tr><td><strong>Severe</strong></td><td>Substrate revokes the <code>session_id</code>. All subsequent calls from that session return 412 Precondition Required.</td></tr>
+        <tr><td><strong>Pattern</strong></td><td>Repeat violations from the same <code>parser_id</code> trigger trust-level demotion (v2.20). Operators are alerted via audit feed.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Why this design</h3>
+    <p>
+      Markdown is descriptive. JSON Schema is structural. Neither is binding. An AI
+      client can read tool descriptions and interpret them differently than the
+      substrate enforces them — that gap is where weak AIs fail and where attacks
+      live. The Zyrn Protocol closes the gap on the substrate side:
+    </p>
+    <ol style="margin: 0 0 16px 22px; color: var(--text-dim); line-height: 1.9;">
+      <li>Forbidden operations are physically impossible (no UPDATE tool exists).</li>
+      <li>Required fields are validated at request parse, before any storage.</li>
+      <li>The protocol text is hashed; clients must echo the hash to open a session.</li>
+      <li>Every privileged action is audited so violations are post-hoc detectable.</li>
+    </ol>
+
+    <h3>Roadmap — protocol as a Logos program (v4.0)</h3>
+    <p>
+      In v4.0 the protocol becomes a <a href="https://github.com/shammyali/logos">Logos</a>
+      program. The <code>.logos</code> source is the source of truth. The Rust binary
+      embeds the compiled-Logos verifier. The markdown rendering is generated from
+      the source. The substrate's tool dispatcher calls into the Logos verifier on
+      every operation.
+    </p>
+<pre>contract append_fact(session: linear Session, fact: Fact) -&gt; linear Session
+  effect Cap
+  effect Database
+  requires session.expires_at &gt; now()
+  requires fact.source_path != ""
+  requires fact.source_hash != ""
+  requires fact.parser_id in trusted_parsers()
+  requires canonical_hash(fact) == fact.content_hash
+  ensures  audit_emit("fact_appended", fact.id, session.agent_key)
+  on_violation: emit("contract_violation", session.agent_key, reason)
+                 -&gt; revoke_session(session.id)</pre>
+    <p class="dim">
+      The Logos compiler proves <code>requires</code>/<code>ensures</code> hold or
+      refuses to compile. The verifier runs at every call boundary. The substrate
+      cannot ship a tool whose contract violates the protocol because the binary
+      won't link. <strong>The verifier is the protocol. The protocol is the
+      verifier.</strong> No drift is possible.
+    </p>
+
+    <p style="margin-top: 24px;">
+      Full text:
+      <a href="https://github.com/shammyali/zyrn/blob/main/docs/PROTOCOL.md">docs/PROTOCOL.md</a> ·
+      canonical bytes:
+      <a href="https://github.com/shammyali/zyrn/blob/main/zyrn/src/protocol.rs"><code>PROTOCOL_V1_TEXT</code></a> ·
+      live endpoint: <code>GET /protocol</code> on any Zyrn instance.
+    </p>
+  </div>
+</section>
+
 <!-- ============ ECOSYSTEM ============ -->
 <section id="ecosystem">
   <div class="wrap">
-    <h2><span class="anchor">§7</span>Ecosystem</h2>
+    <h2><span class="anchor">§8</span>Ecosystem</h2>
     <p>Nine sibling crates, same family, same doctrine. All Apache-2.0, all public.</p>
     <table>
       <thead><tr><th style="width: 26%;">Crate</th><th style="width: 12%;">Version</th><th>Purpose</th></tr></thead>
       <tbody>
         <tr>
           <td><a href="https://github.com/shammyali/zyrn"><code>zyrn</code></a></td>
-          <td>v3.0.0</td>
-          <td>The substrate. Library + CLI + HTTP/MCP server. 841 tests.</td>
+          <td>v3.1.0</td>
+          <td>The substrate. Library + CLI + HTTP/MCP server. 859 tests. Ships <a href="#protocol">The Protocol v1.0</a>.</td>
         </tr>
         <tr>
           <td><a href="https://github.com/shammyali/zyrn-console"><code>zyrn-console</code></a></td>
@@ -879,7 +1103,7 @@ Content-Type: application/json
 <!-- ============ FAQ ============ -->
 <section id="faq">
   <div class="wrap">
-    <h2><span class="anchor">§8</span>FAQ</h2>
+    <h2><span class="anchor">§9</span>FAQ</h2>
 
     <details>
       <summary>How is this different from a vector database?</summary>
@@ -999,12 +1223,13 @@ Content-Type: application/json
 <!-- ============ DOCS ============ -->
 <section id="docs">
   <div class="wrap">
-    <h2><span class="anchor">§9</span>Documentation</h2>
+    <h2><span class="anchor">§10</span>Documentation</h2>
     <p>Full documentation lives in the repo. The most important documents:</p>
     <table>
       <thead><tr><th style="width: 28%;">Document</th><th>Purpose</th></tr></thead>
       <tbody>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/MANIFESTO.md">MANIFESTO.md</a></td><td>Why this exists. The 7 principles. Honest trade-offs.</td></tr>
+        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/PROTOCOL.md">PROTOCOL.md</a></td><td>The Zyrn Protocol v1.0 — 9 laws, handshake, enforcement classification.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">DETERMINISM.md</a></td><td>The 7 invariants — spec, proofs, audit paths.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/OPERATOR.md">OPERATOR.md</a></td><td>Day-0 install through day-2 production ops.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/DR.md">DR.md</a></td><td>10 disaster-recovery scenarios with stepped procedures.</td></tr>
@@ -1015,7 +1240,7 @@ Content-Type: application/json
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/FUZZING.md">FUZZING.md</a></td><td>cargo-fuzz harness, run instructions.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/RATE_LIMITING.md">RATE_LIMITING.md</a></td><td>Two-layer rate-limit model.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/SECURITY.md">SECURITY.md</a></td><td>Vulnerability disclosure policy.</td></tr>
-        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/CHANGELOG.md">CHANGELOG.md</a></td><td>Full release history v0.0.1 → v3.0.0.</td></tr>
+        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/CHANGELOG.md">CHANGELOG.md</a></td><td>Full release history v0.0.1 → v3.1.0.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1024,13 +1249,14 @@ Content-Type: application/json
 <footer>
   <div class="wrap">
     <div>
-      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.0.0
+      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.1.0
       <br>
       A project of <a href="https://github.com/shammyali/logos">Logos Technologies LLC</a> (Dubai, UAE).
       Maintained by Shammy Ali. AI as co-author.
     </div>
     <div class="row">
       <a href="https://github.com/shammyali/zyrn">github</a>
+      <a href="https://github.com/shammyali/zyrn/blob/main/docs/PROTOCOL.md">protocol</a>
       <a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">determinism</a>
       <a href="https://github.com/shammyali/zyrn/blob/main/docs/OPERATOR.md">operator</a>
       <a href="https://github.com/shammyali/zyrn/blob/main/SECURITY.md">security</a>
