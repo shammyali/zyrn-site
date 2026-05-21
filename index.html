@@ -412,10 +412,10 @@
 
 <nav>
   <div class="wrap">
-    <a href="#" class="brand">zyrn<span class="version">v3.1.1</span></a>
+    <a href="#" class="brand">zyrn<span class="version">v3.2.0</span></a>
     <ul>
+      <li><a href="#manifesto">manifesto</a></li>
       <li><a href="#install">install</a></li>
-      <li><a href="#invariants">invariants</a></li>
       <li><a href="#tools">tools</a></li>
       <li><a href="#architecture">architecture</a></li>
       <li><a href="#protocol">protocol</a></li>
@@ -429,7 +429,7 @@
 <!-- ============ HERO ============ -->
 <header class="hero">
   <div class="wrap">
-    <div class="meta"><span class="dot"></span>v3.1.1 · 873 tests passing · Apache-2.0 · written in Rust · <a href="#protocol" style="color:var(--accent);border-bottom:none;">The Protocol — enforced</a></div>
+    <div class="meta"><span class="dot"></span>v3.2.0 · 885 tests passing · Apache-2.0 · written in Rust · <a href="#protocol" style="color:var(--accent);border-bottom:none;">The Protocol — enforced</a> · <a href="#manifesto" style="color:var(--accent);border-bottom:none;">Manifesto</a></div>
     <h1>Zyrn — an AI-native database.</h1>
     <p class="lead">
       Append-only, content-hashed, provenance-mandatory. Built by AI, for AI.
@@ -466,6 +466,114 @@
     </div>
   </div>
 </header>
+
+<!-- ============ MANIFESTO ============ -->
+<section id="manifesto">
+  <div class="wrap">
+    <h2><span class="anchor">§0</span>Manifesto <span style="font-size:14px;color:var(--text-faint);font-weight:400;margin-left:8px;">moved from repo, lives here now</span></h2>
+
+    <p class="lead">Every fact is also its own provenance, and AI is the operator.</p>
+
+    <p>
+      Zyrn is a database where the operator is AI. Not a SQL engine with an
+      "AI assistant" stapled on. Not a vector store with metadata bolted to it.
+      Not a knowledge graph with a chat interface. A database whose entire API
+      surface, fact model, indexing strategy, and audit guarantees are
+      designed end-to-end for AI as the primary user. Humans live at the chat
+      surface and never write a query.
+    </p>
+
+    <p>
+      Zyrn stores <strong>facts</strong>. A fact is an immutable typed record with
+      mandatory provenance — <code>source_hash</code>, <code>parser_id</code>,
+      <code>ingest_ts</code>, byte range. Every fact knows where it came from,
+      who parsed it, when, and with which version. There is no <code>UPDATE</code>.
+      There is no <code>DELETE</code>. Corrections supersede; the past is never
+      overwritten.
+    </p>
+
+    <p>
+      AI talks to Zyrn through <strong>typed tool calls</strong> —
+      <code>ingest</code>, <code>retrieve</code>, <code>aggregate</code>,
+      <code>relate</code>, <code>traverse</code>, <code>rank</code>,
+      <code>trace</code>, <code>supersede</code>. There is no query language
+      for the LLM to emit incorrectly, because there is no language. Tool
+      signatures <em>are</em> the API. New capabilities are new tools, not
+      extensions to a grammar.
+    </p>
+
+    <p>
+      Retrieval is <strong>deterministic</strong>. Filters first; vector ranking
+      only within the filtered candidate set. The five-stack of lossy
+      conversions that wrecks RAG accuracy (PDF → text → chunks → embeddings →
+      cosine → LLM) is replaced by parse-once-store-as-facts plus exact-match
+      indexes the system maintains itself. The vector layer is demoted from
+      retriever to ranker.
+    </p>
+
+    <p>
+      Aggregations are computed by Zyrn, not by the LLM. Sums, counts, joins,
+      averages — code does math. The LLM narrates the result. The LLM is at
+      the edges: parsing on the way in, narrating on the way out. The core
+      is exact.
+    </p>
+
+    <p>
+      Zyrn commits to two accuracy classes and never blurs them.
+      <strong>Class A</strong> (factual: counts, sums, filters, joins,
+      substring search) carries a 100% guarantee. <strong>Class B</strong>
+      (interpretive: summaries, judgments) returns AI best-effort with full
+      provenance. The user sees which is which.
+    </p>
+
+<pre>binary doc  →  AI parse  →  fact log  →  typed tool call  →  deterministic result  →  AI narrate  →  chat</pre>
+
+    <p>
+      That's the loop. AI lives at parse-in and narrate-out. The middle is
+      code.
+    </p>
+
+    <h3>Why this exists</h3>
+    <p>
+      For sixty years databases have been designed for human DBAs. SQL is a
+      1974 design for humans typing at terminals. Schemas declared upfront.
+      Migrations to change them. DBAs hand-tuning indexes. Foreign keys to
+      remember relationships. INSERT/UPDATE/DELETE because humans like editing
+      data.
+    </p>
+
+    <p>
+      When AI talks to these systems, the LLM is the only AI in a stack of
+      seven human layers: database design, schema, query language, indexing
+      strategy, ETL, application code, UI. The LLM spends every query
+      translating across all of them. The cumulative tax of that translation
+      is what people call "RAG accuracy problems."
+    </p>
+
+    <p>
+      The fix is not a better query language. The fix is not a better chunking
+      strategy. The fix is not a better embedding model. <strong>The fix is to
+      remove the human layers entirely.</strong> The database itself must be
+      AI-native — designed end-to-end for AI as the primary operator.
+    </p>
+
+    <p>
+      In 2026, AI can author idiomatic database operations more fluently than
+      most humans. What's missing is a database that doesn't force AI to
+      translate to human conventions first. Zyrn is built on the bet that
+      <strong>storage designed for AI is the missing layer of the AI-native
+      stack</strong>.
+    </p>
+
+    <p class="dim" style="margin-top: 24px;">
+      Note: this manifesto used to live in the repo as <code>MANIFESTO.md</code>.
+      As of v3.2.0 it lives here on the marketing site. The repo carries only
+      operator/developer material. AI agents read no markdown — they fetch
+      <code>GET /kb</code> from a running server for their full operational
+      model. Two surfaces, zero overlap.
+    </p>
+  </div>
+</section>
 
 <!-- ============ WHAT IT IS ============ -->
 <section id="overview">
@@ -1060,8 +1168,8 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
       <tbody>
         <tr>
           <td><a href="https://github.com/shammyali/zyrn"><code>zyrn</code></a></td>
-          <td>v3.1.1</td>
-          <td>The substrate. Library + CLI + HTTP/MCP server. 873 tests. Ships <a href="#protocol">The Protocol v1.0 — enforced</a>.</td>
+          <td>v3.2.0</td>
+          <td>The substrate. Library + CLI + HTTP/MCP server. 885 tests. Ships <a href="#protocol">The Protocol v1.0 — enforced</a> + AI-native KB at <code>GET /kb</code>.</td>
         </tr>
         <tr>
           <td><a href="https://github.com/shammyali/zyrn-console"><code>zyrn-console</code></a></td>
@@ -1236,8 +1344,8 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
     <table>
       <thead><tr><th style="width: 28%;">Document</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/MANIFESTO.md">MANIFESTO.md</a></td><td>Why this exists. The 7 principles. Honest trade-offs.</td></tr>
-        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/PROTOCOL.md">PROTOCOL.md</a></td><td>The Zyrn Protocol v1.0 — 9 laws, handshake, enforcement classification.</td></tr>
+        <tr><td><a href="#manifesto">Manifesto (on this site)</a></td><td>Why Zyrn exists. Moved here in v3.2.0 — repo carries operator material only.</td></tr>
+        <tr><td><a href="#protocol">The Protocol (on this site)</a></td><td>The 9 laws + handshake + enforcement. Authoritative AI source: <code>GET /kb</code> on any running server.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">DETERMINISM.md</a></td><td>The 7 invariants — spec, proofs, audit paths.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/OPERATOR.md">OPERATOR.md</a></td><td>Day-0 install through day-2 production ops.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/DR.md">DR.md</a></td><td>10 disaster-recovery scenarios with stepped procedures.</td></tr>
@@ -1248,7 +1356,7 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/FUZZING.md">FUZZING.md</a></td><td>cargo-fuzz harness, run instructions.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/docs/RATE_LIMITING.md">RATE_LIMITING.md</a></td><td>Two-layer rate-limit model.</td></tr>
         <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/SECURITY.md">SECURITY.md</a></td><td>Vulnerability disclosure policy.</td></tr>
-        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/CHANGELOG.md">CHANGELOG.md</a></td><td>Full release history v0.0.1 → v3.1.1.</td></tr>
+        <tr><td><a href="https://github.com/shammyali/zyrn/blob/main/CHANGELOG.md">CHANGELOG.md</a></td><td>Full release history v0.0.1 → v3.2.0.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1257,18 +1365,18 @@ Authorization: Bearer $ZYRN_AUTH_TOKEN
 <footer>
   <div class="wrap">
     <div>
-      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.1.1
+      <strong style="color: var(--text);">zyrn</strong> · ai-native database · Apache-2.0 · v3.2.0
       <br>
       A project of <a href="https://github.com/shammyali/logos">Logos Technologies LLC</a> (Dubai, UAE).
       Maintained by Shammy Ali. AI as co-author.
     </div>
     <div class="row">
       <a href="https://github.com/shammyali/zyrn">github</a>
-      <a href="https://github.com/shammyali/zyrn/blob/main/docs/PROTOCOL.md">protocol</a>
+      <a href="#protocol">protocol</a>
       <a href="https://github.com/shammyali/zyrn/blob/main/docs/DETERMINISM.md">determinism</a>
       <a href="https://github.com/shammyali/zyrn/blob/main/docs/OPERATOR.md">operator</a>
       <a href="https://github.com/shammyali/zyrn/blob/main/SECURITY.md">security</a>
-      <a href="https://github.com/shammyali/zyrn/blob/main/MANIFESTO.md">manifesto</a>
+      <a href="#manifesto">manifesto</a>
     </div>
   </div>
 </footer>
